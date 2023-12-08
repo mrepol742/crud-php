@@ -1,0 +1,22 @@
+{
+    "name": "mrepol742/crud-php",
+    "type": "project",
+    "require": {
+        "twbs/bootstrap": "^5.3",
+        "components/font-awesome": "^6.4",
+        "desandro/masonry": "^4.2",
+        "components/jquery": "^3.7"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Mrepol742\\CrudPhp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Melvin Jones Repol",
+            "email": "mrepol742@gmail.com"
+        }
+    ]
+}

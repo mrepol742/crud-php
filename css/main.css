@@ -1,0 +1,48 @@
+* {
+    font-family: 'Maven Pro', sans-serif;
+    color: #212121;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+th,
+h1 strong,
+h2 span {
+    letter-spacing: -0.7px;
+    font-family: 'Source Code Pro', sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+svg {
+    fill: #212121;
+}
+
+.col {
+    padding-top: 10px;
+}
+
+.input-group2 {
+    position: relative;
+}
+
+.input-group2 i {
+    position: absolute;
+    left: 15px;
+    top: 25px;
+}
+
+
+input[type=text] {
+    padding: 12px 40px;
+    margin: 8px 0;
+    display: inline-block;
+    border: none;
+    width: 100%;
+} 

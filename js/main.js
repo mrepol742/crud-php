@@ -1,4 +1,4 @@
-function showModalDialog(title, postTitleA, postContentA, actionType, _pid) {
+function showModalDialog(title, json, actionType, _pid) {
     let modalContainer = document.getElementById("modalContainer");
 
     let modal = document.createElement("div");
@@ -10,7 +10,7 @@ function showModalDialog(title, postTitleA, postContentA, actionType, _pid) {
 
     let modalDialog = document.createElement("div");
     modalDialog.setAttribute("class", "modal-dialog modal-dialog-centered");
-    
+
     let modalContent = document.createElement("div");
     modalContent.setAttribute("class", "modal-content");
 
@@ -23,7 +23,7 @@ function showModalDialog(title, postTitleA, postContentA, actionType, _pid) {
     let h1 = document.createElement("h1");
     h1.setAttribute("class", "modal-title fs-5");
     h1.setAttribute("id", "addDataModal");
-    h1.innerHTML = title
+    h1.innerHTML = title;
     let closeButton = document.createElement("button");
     closeButton.setAttribute("type", "button");
     closeButton.setAttribute("class", "btn-close");
@@ -35,48 +35,90 @@ function showModalDialog(title, postTitleA, postContentA, actionType, _pid) {
 
     let modalBody = document.createElement("div");
     modalBody.setAttribute("class", "modal-body");
-    let inputGroup1 = document.createElement("div");
-    inputGroup1.setAttribute("class", "input-group2");
-    let postTitle = document.createElement("input");
-    postTitle.setAttribute("type", "text");
-    postTitle.setAttribute("placeholder", "Post title");
-    postTitle.setAttribute("name", "title");
-    postTitle.setAttribute("required", "required");
-    if (postTitleA != null) {
-        postTitle.setAttribute("value", postTitleA);
-    }
-    inputGroup1.append(postTitle);
-    let heading = document.createElement("i");
-    heading.setAttribute("class", "fa-solid fa-heading");
-    inputGroup1.append(heading);
 
-    let inputGroup2 = document.createElement("div");
-    inputGroup2.setAttribute("class", "input-group2");
-    let postContent = document.createElement("input");
-    postContent.setAttribute("type", "text");
-    postContent.setAttribute("placeholder", "Post content");
-    postContent.setAttribute("name", "content");
-    postContent.setAttribute("required", "required");
-    if (postContentA != null) {
-        postContent.setAttribute("value", postContentA);
+    let inputType = ["text", "text", "date", "text", "text", "email", "number"];
+    let inputName = ["lastName", "firstName", "birthday", "gender", "address", "emailAddress", "contactNumber"];
+    let inputPlaceholder = ["Last name", "First name", "Birthday", "Gender", "Address", "Email Address", "Contact No."];
+
+    for (input in inputType) {
+        if (inputName[input] == "gender") {
+            let inputGroup = document.createElement("div");
+            inputGroup.setAttribute("class", "input-group2");
+            let postTitle = document.createElement("select");
+            postTitle.setAttribute("class", "form-select");
+            // postTitle.setAttribute("type", inputType[input]);
+            postTitle.setAttribute("placeholder", inputPlaceholder[input]);
+            postTitle.setAttribute("name", inputName[input]);
+            postTitle.setAttribute("required", "required");
+
+            let option1 = document.createElement("option");
+            option1.innerText = "";
+            let option2 = document.createElement("option");
+            option2.innerText = "Male";
+            let option3 = document.createElement("option");
+            option3.innerText = "Female";
+            let option4 = document.createElement("option");
+            option4.innerText = "Other";
+
+            if (actionType == "edit") {
+                switch (json[inputName[input]]) {
+                    case "Male":
+                        option2.setAttribute("selected", "selected");
+                        break;
+                    case "Female":
+                        option3.setAttribute("selected", "selected");
+                        break;
+                    default:
+                    case "Other":
+                        option4.setAttribute("selected", "selected");
+                        break;
+                }
+            }
+
+            postTitle.append(option1);
+            postTitle.append(option2);
+            postTitle.append(option3);
+            postTitle.append(option4);
+
+            // value to be add here for edit function
+            inputGroup.append(postTitle);
+            let heading = document.createElement("i");
+            heading.setAttribute("class", "fa-solid fa-info");
+            inputGroup.append(heading);
+
+            modalBody.append(inputGroup);
+        } else {
+            let inputGroup = document.createElement("div");
+            inputGroup.setAttribute("class", "input-group2");
+            let postTitle = document.createElement("input");
+            postTitle.setAttribute("type", inputType[input]);
+            postTitle.setAttribute("placeholder", inputPlaceholder[input]);
+            postTitle.setAttribute("name", inputName[input]);
+            postTitle.setAttribute("required", "required");
+
+            if (actionType == "edit") {
+                postTitle.setAttribute("value", json[inputName[input]]);
+            }
+
+            // value to be add here for edit function
+            inputGroup.append(postTitle);
+            let heading = document.createElement("i");
+            heading.setAttribute("class", "fa-solid fa-info");
+            inputGroup.append(heading);
+
+            modalBody.append(inputGroup);
+        }
     }
-    inputGroup2.append(postContent);
-    let contentB = document.createElement("i");
-    contentB.setAttribute("class", "fa-solid fa-book-open");
-    inputGroup2.append(contentB);
 
     let hiddenInput = document.createElement("input");
     hiddenInput.setAttribute("type", "hidden");
-    hiddenInput.setAttribute("name", "_pid");
+    hiddenInput.setAttribute("name", "_aid");
 
     if (_pid != null) {
         hiddenInput.setAttribute("value", _pid);
     }
 
     modalBody.append(hiddenInput);
-
-    modalBody.append(inputGroup1);
-    modalBody.append(inputGroup2);
 
     let modalFooter = document.createElement("div");
     modalFooter.setAttribute("class", "modal-footer");
@@ -95,7 +137,6 @@ function showModalDialog(title, postTitleA, postContentA, actionType, _pid) {
     modalFooter.append(dismissButton);
     modalFooter.append(saveChanges);
 
-
     form.append(modalHeader);
     form.append(modalBody);
     form.append(modalFooter);
@@ -111,10 +152,9 @@ function showModalDialog(title, postTitleA, postContentA, actionType, _pid) {
     });
 }
 
-addData.onclick = function() {
-    showModalDialog("Add Data", null, null, "saveChanges", null);
-}
-
+addData.onclick = function () {
+    showModalDialog("Add Data", null, "saveChanges", null);
+};
 
 let deleteItems = document.querySelectorAll(".delete");
 
@@ -123,33 +163,54 @@ for (const item in deleteItems) {
         let cardTitles = document.querySelectorAll(".card-title");
         const a = deleteItems[item].dataset.id;
         deleteItems[item].onclick = function () {
-           let form = document.createElement("form");
-           form.setAttribute("method", "post");
-           form.setAttribute("style", "display: none;");
-           let iInput = document.createElement("input");
-           iInput.setAttribute("value", a);
-           iInput.setAttribute("name", "_pid");
-           let button = document.createElement("button");
-           button.setAttribute("type", "submit");
-           button.setAttribute("name", "delete");
-           form.append(iInput);
-           form.append(button);
-           let modalContainer = document.getElementById("modalContainer");
-           modalContainer.append(form);
-           button.click();
+            let form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("style", "display: none;");
+            let iInput = document.createElement("input");
+            iInput.setAttribute("value", a);
+            iInput.setAttribute("name", "_pid");
+            let button = document.createElement("button");
+            button.setAttribute("type", "submit");
+            button.setAttribute("name", "delete");
+            form.append(iInput);
+            form.append(button);
+            let modalContainer = document.getElementById("modalContainer");
+            modalContainer.append(form);
+            button.click();
         };
     }
 }
 
 let editItems = document.querySelectorAll(".edit");
+let raw = document.querySelectorAll(".card-body");
 
 for (const item in editItems) {
     if (typeof editItems[item] === "object") {
-        let postTitles = document.querySelectorAll(".card-title");
-        let postContents = document.querySelectorAll(".card-text");
         const a = editItems[item].dataset.id;
+        const json = JSON.parse(atob(raw[item].dataset.id));
+
         editItems[item].onclick = function () {
-            showModalDialog("Edit Data", postTitles[item].innerText, postContents[item].innerText, "edit", a);
+            showModalDialog("Edit Data", json, "edit", a);
         };
     }
 }
+
+function search1() {
+    let val = search.value;
+    if (val.trim() != "") {
+        window.location.href = "?q=" + search.value;
+    } else {
+        window.location.href = "/crud-php";
+    }
+}
+
+search.addEventListener("keydown", function (e) {
+    if (e.keyCode == 13) {
+        e.preventDefault();
+        search1();
+    }
+});
+
+but.onclick = function () {
+    search1();
+};

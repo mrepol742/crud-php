@@ -1,6 +1,6 @@
 * {
     font-family: 'Maven Pro', sans-serif;
-    color: #212121;
+    color: #535151;
 }
 
 h1,
@@ -38,11 +38,53 @@ svg {
     top: 25px;
 }
 
+.card {
+    border: none;
+    box-shadow: 0px 0px 15px 5px #21212121;
+    padding: 10px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    border-radius: 10px;
+}
 
-input[type=text] {
+input, select, option {
     padding: 12px 40px;
     margin: 8px 0;
     display: inline-block;
     border: none;
     width: 100%;
-} 
+}
+
+#search {
+    border-width: 0px;
+    width: 100%;
+    color: #fff;
+    padding-left: 20px;
+    padding-right: 5px;
+    height: 20px;
+    background-color: transparent;
+    outline: none;
+}
+
+#search::placeholder {
+    color: #fff;
+}
+
+.search-container {
+    margin-left: 15px;
+    width: 50%;
+    border-radius: 7px;
+    background: #0b5ed7;
+    display: flex;
+    justify-content: space-between;
+}
+
+.search-container>#but {
+    padding-right: 15px;
+    align-self: center;
+    color: #fff;
+}
+
+.form-select {
+    display: inline-block;
+}

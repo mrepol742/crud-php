@@ -2,28 +2,33 @@
 include("include/dbcon.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST["saveChanges"])) {
-        $title = $_POST["title"];
-        $content = $_POST["content"];
-
-        $sql = "INSERT INTO post (post_title, post_content) VALUES ";
-        $sql .= "('$title', '$content')";
-        if ($conn->query($sql) === TRUE) {
-            echo "---------------------> Data Added <---------------------";
-        }
-    } else if (isset($_POST["edit"])) {
-        $title = $_POST["title"];
-        $content = $_POST["content"];
+    if (isset($_POST["delete"])) {
         $_pid = $_POST["_pid"];
-        $update = "UPDATE post SET post_title='$title' , post_content='$content' WHERE _pid=$_pid";
-        if ($conn->query($update) === true) {
-            echo "---------------------> Data Updated <---------------------";
-        }
-    } else if (isset($_POST["delete"])) {
-        $_pid = $_POST["_pid"];
-        $delete = "DELETE FROM post WHERE `post`.`_pid` = $_pid";
+        $delete = "DELETE FROM account WHERE `account`.`_aid` = $_pid";
         if ($conn->query($delete) === true) {
             echo "---------------------> Data Deleted <---------------------";
+        }
+    } else {
+        $lastName = $_POST["lastName"];
+        $firstName = $_POST["firstName"];
+        $birthday = $_POST["birthday"];
+        $gender = $_POST["gender"];
+        $address = $_POST["address"];
+        $emailAddress = $_POST["emailAddress"];
+        $contactNumber = $_POST["contactNumber"];
+
+        if (isset($_POST["saveChanges"])) {
+            $sql = "INSERT INTO account (lastName, firstName, birthday, gender, address, emailAddress, contactNo) VALUES ";
+            $sql .= "('$lastName', '$firstName', '$birthday', '$gender', '$address', '$emailAddress', '$contactNumber')";
+            if ($conn->query($sql) === TRUE) {
+                echo "---------------------> Data Added <---------------------";
+            }
+        } else if (isset($_POST["edit"])) {
+            $_aid = $_POST["_aid"];
+            $update = "UPDATE account SET lastName='$lastName' , firstName='$firstName', birthday='$birthday', gender='$gender', address='$address', emailAddress='$emailAddress', contactNo='$contactNumber' WHERE _aid=$_aid";
+            if ($conn->query($update) === true) {
+                echo "---------------------> Data Updated <---------------------";
+            }
         }
     }
 }
@@ -72,12 +77,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="container mt-3 mb-3 px-5 py-5">
         <div id="modalContainer"></div>
-        <button class="btn btn-primary px-5" id="addData">Add data</button>
 
+        <div style="display: flex;">
+            <button class="btn btn-primary px-5" id="addData">Add data</button>
+
+            <div class="search-container">
+                <input id="search" placeholder="Search anything..." type="text" name="q"
+                    value="<?php if (isset($_GET["q"]) && !empty($_GET["q"])) { echo $_GET["q"]; } ?>">
+                <i class="fa-solid fa-magnifying-glass" id="but"></i>
+            </div>
+        </div>
+       
         <?php
-        $page = '<div class="row" data-masonry="{\'percentPosition\': true }" >';
+        $page = '<div class="row mt-5" data-masonry="{\'percentPosition\': true }" >';
 
-        $read = mysqli_query($conn, "SELECT * FROM post");
+
+        $query = "SELECT * FROM account ";
+
+        if (isset($_GET["q"]) && !empty($_GET["q"])) {
+            $val = $_GET["q"];
+            $query .= " WHERE lastName LIKE '%$val%' OR";
+            $query .= " firstName LIKE '%$val%' OR";
+            $query .= " birthday LIKE '%$val%' OR";
+            $query .= " gender LIKE '%$val%' OR";
+            $query .= " address LIKE '%$val%' OR";
+            $query .= " emailAddress LIKE '%$val%' OR";
+            $query .= " contactNo LIKE '%$val%' ";
+        }
+
+        $query .= "ORDER BY _aid DESC";
+
+        $read = mysqli_query($conn, $query);
         $count = 0;
         if (mysqli_num_rows($read) > 0) {
             while ($row = mysqli_fetch_assoc($read)) {
@@ -86,9 +116,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $page .= '<div class="row" data-masonry="{\'percentPosition\': true }" >';
                 }
                 $page .= '<div class="col">';
-                $page .= str_replace("%ID%", $row["_pid"], str_replace("%TITLE%", $row["post_title"], str_replace("%CONTENT%", $row["post_content"], getCard())));
+
+                $cardContent = '
+                    <b>Last Name:</b> ' . $row["lastName"] . '
+                    <br><b>First Name:</b> ' . $row["firstName"] . '
+                    <br><b>Birthday:</b> ' . $row["birthday"] . '
+                    <br><b>Gender:</b> ' . $row["gender"] . '
+                    <br><b>Address:</b> ' . $row["address"] . '
+                    <br><b>Email Address:</b> ' . $row["emailAddress"] . '
+                    <br><b>Contact Number:</b> ' . $row["contactNo"];
+
+                $json = '{"lastName": "' . $row["lastName"] . '",
+                    "firstName": "' . $row["firstName"] . '",
+                    "birthday": "' . $row["birthday"] . '",
+                    "gender": "' . $row["gender"] . '",
+                    "address": "' . $row["address"] . '",
+                    "emailAddress": "' . $row["emailAddress"] . '",
+                    "contactNumber": ' . $row["contactNo"] . '}';
+
+                $page .= str_replace("%JSON%", base64_encode($json), str_replace("%ID%", $row["_aid"], str_replace("%CONTENT%", $cardContent, getCard())));
                 $page .= '</div>';
                 $count += 1;
+            }
+        } else {
+            if (isset($_GET["q"]) && !empty($_GET["q"])) {
+                $page .= "<h1>No search result for <u>" . $_GET["q"] . "</u>.</h1>";
+            } else {
+                $page .= "<h1>No data found!</h1>";
             }
         }
 
@@ -98,14 +152,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function getCard()
         {
             return '<div class="card">
-            <div class="card-body">
-                <h5 class="card-title">%TITLE%</h5>
+            <div class="card-body" data-id="%JSON%">
                 <p class="card-text">
                     %CONTENT%
                 </p>
-                <small class="text-muted"><i class="fa-solid fa-pen-to-square edit" data-id="%ID%"></i> &nbsp;Edit
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i class="fa-solid fa-trash-can delete" data-id="%ID%"></i> &nbsp;Delete</small>
+                <small class="text-muted"><i class="fa-solid fa-pen-to-square edit" data-id="%ID%"></i> &nbsp;Edit</small>
+                    &nbsp;&nbsp;&nbsp;&nbsp; <small class="text-muted"><i class="fa-solid fa-trash-can delete" data-id="%ID%"></i> &nbsp;Delete</small>
             </div>
+            
         </div>';
         }
 
